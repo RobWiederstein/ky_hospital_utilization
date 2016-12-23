@@ -4,7 +4,9 @@ a <- read.csv(file = file,
          as.is = T)
 library(plyr)
 library(dplyr)
-a.1 <- a %>%
+library(magrittr)
+a.1 <- 
+        a %>%
         group_by(year, variable) %>%
         summarize(obs = length(value),
                   min = min(value),
@@ -15,8 +17,7 @@ a.1 <- a %>%
                   max = max(value),
                   sum = sum(value),
                   sd = sd(value, na.rm = T),
-                  nas = sum(is.na(value))
-        ) %>%
+                  nas = sum(is.na(value))) %>%
         arrange(variable, year)
 write.csv(a.1, file = "./tables/kyhut1_summary.csv",
           row.names = F)

@@ -340,19 +340,29 @@ plot_methodist_avg_length_of_stay <- function(){
 
 plot_methodist_occupancy_pct <- function(){
         a <- get_data()
+        library(magrittr)
         library(ggplot2)
         library(scales)
         methodist <- a[a$hospital == "methodist hospital" &
                                a$variable == "occupancy_pct",
                        ]
+        all <-
+                a %>%
+                filter(variable == "occupancy_pct") %>%
+                group_by(year) %>%
+                summarise(state_avg = round(mean(value), 1))
+        methodist <- merge(methodist, all)
+        
         p <- ggplot(methodist, aes(x = year, y = value))
-        p <- p + geom_line()
+        p <- p + geom_line(colour = "blue3")
+        p <- p + geom_line(aes(x = year, y = state_avg))
         p <- p + ylab("percent")
-        p <- p + ggtitle("Methodist Hospital \n Occupancy Percent")
+        p <- p + ggtitle("Methodist Hospital Occupancy Percent")
         p <- p + scale_x_continuous(breaks = c(2000, 2005, 2010, 2015),
                                     minor_breaks = 2000:2015,
                                     limits = c(2000, 2015)
         )
+        p <- p + theme(plot.title = element_text(hjust = 0.5))
         p
         ggsave("./charts/Methodist_Occupancy_Percent.pdf", width = 8, height = 5,
                units = c("in"))

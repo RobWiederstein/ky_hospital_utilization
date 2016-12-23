@@ -50,6 +50,10 @@ a$hospital <- tolower(a$hospital)
 #convert character to numeric
 a[, 2:13] <- apply(a[, 2:13], MARGIN = 2, as.numeric)
 a[, 13] <- as.integer(a[, 13])
+apply(a, 2, function(x) sum(is.na(x)))
+a[sample(1:nrow(a), size = 100), ]
+
+
 #wide to long
 a <- tidyr::gather(a, variable, value, -hospital, -year)
 #save
