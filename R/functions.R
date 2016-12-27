@@ -322,17 +322,31 @@ plot_methodist_avg_length_of_stay <- function(){
         a <- get_data()
         library(ggplot2)
         library(scales)
+        library(dplyr)
+        library(magrittr)
         methodist <- a[a$hospital == "methodist hospital" &
                                a$variable == "avg_length_of_stay",
                        ]
+        all <-
+                a %>%
+                filter(variable == "avg_length_of_stay") %>%
+                group_by(year) %>%
+                summarise(state_avg = round(mean(value, na.rm = T), 2))
+        
+        methodist <- merge(methodist, all)
+        
         p <- ggplot(methodist, aes(x = year, y = value))
-        p <- p + geom_line()
+        p <- p + geom_line(colour = "blue3")
+        p <- p + geom_line(aes(x = year, y = state_avg))
         p <- p + ylab("days")
-        p <- p + ggtitle("Methodist Hospital \n Avg. Length of Stay")
+        p <- p + ggtitle("Methodist Hospital Avg. Length of Stay")
         p <- p + scale_x_continuous(breaks = c(2000, 2005, 2010, 2015),
-                                    minor_breaks = 2000:2015,
-                                    limits = c(2000, 2015)
+                                    minor_breaks = 2000:2016,
+                                    limits = c(2000, 2016)
         )
+        p <- p + annotate("text", x = 2015, y = 6, label = "Kentucky", size = 3)
+        p <- p + annotate("text", x = 2015, y = 4.3, label = "Methodist", size = 3, colour = "blue3")
+        p <- p + theme(plot.title = element_text(hjust = 0.5))
         p
         ggsave("./charts/Methodist_Avg_Length_of_Stay.pdf", width = 8, height = 5,
                units = c("in"))
@@ -356,13 +370,22 @@ plot_methodist_occupancy_pct <- function(){
         p <- ggplot(methodist, aes(x = year, y = value))
         p <- p + geom_line(colour = "blue3")
         p <- p + geom_line(aes(x = year, y = state_avg))
+        
         p <- p + ylab("percent")
         p <- p + ggtitle("Methodist Hospital Occupancy Percent")
         p <- p + scale_x_continuous(breaks = c(2000, 2005, 2010, 2015),
-                                    minor_breaks = 2000:2015,
-                                    limits = c(2000, 2015)
+                                    minor_breaks = 2000:2016,
+                                    limits = c(2000, 2016)
         )
+        p <- p + scale_y_continuous(breaks = seq(from = 25, to = 60, by = 5),
+                                    limits = c(25, 60))
         p <- p + theme(plot.title = element_text(hjust = 0.5))
+        p <- p + annotate("text", x = 2015, y = 42.5, label = "Kentucky", size = 3)
+        p <- p + annotate("text", x = 2015, y = 27.5, label = "Methodist", size = 3, colour = "blue3")
+        p
+        p <- p + geom_vline(xintercept = c(2005, 2010), linetype = 3, color = "gray30")
+        p <- p + annotate("text", x = 2005.25, y = 56.5, label = "S. Twr.-2005", size = 3, angle = 90)
+        p <- p + annotate("text", x = 2010.25, y = 57.5, label = "ACA-2010", size = 3, angle = 90)
         p
         ggsave("./charts/Methodist_Occupancy_Percent.pdf", width = 8, height = 5,
                units = c("in"))
