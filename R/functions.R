@@ -389,4 +389,43 @@ plot_methodist_occupancy_pct <- function(){
         p
         ggsave("./charts/Methodist_Occupancy_Percent.pdf", width = 8, height = 5,
                units = c("in"))
+        filename <- "./charts/Hosp_Occupancy_Percent_2000_2015_fb.pdf"
+        ggsave(filename = filename, width = 8, height = 4.21, unit = "in")
 }
+a <- get_data()
+library(magrittr)
+library(ggplot2)
+library(scales)
+methodist <- a[a$hospital == "methodist hospital" &
+                       a$variable == "occupancy_pct",
+               ]
+df <-
+        a %>%
+        filter(variable == "occupancy_pct") %>%
+        filter(year %in% c(2000, 2015)) %>%
+        spread(key = year, value) %>%
+        na.omit() %>%
+        gather(key = year, value = occupancy_pct, -hospital, -variable)
+df
+
+
+p<- ggplot(df, aes(x = as.integer(year) , y = occupancy_pct, group = hospital))
+p <- p + geom_line(colour = "gray")
+df.meth <- filter(df, hospital == "methodist hospital")
+p <- p + geom_line(data = df.meth, aes(x = as.integer(year), y = occupancy_pct), 
+                   colour = "blue3",
+                   size = 1.5)
+p <- p + ylab("percent")
+p <- p + ggtitle("Hospital Occupancy Percent \n 2000 & 2015")
+p <- p + scale_y_continuous(breaks = c(0, seq(from = 0, to = 80, by = 20)),
+                            limits = c(0, 80),
+                            labels = paste(c(0, seq(from = 0, to = 80, by = 20)), "%", sep = ""))
+p <- p + scale_x_continuous(breaks = c(2000, 2015),
+                            name = "year")
+p <- p + theme(plot.title = element_text(hjust = 0.5))
+p <- p + annotate("text", x = 2014, y = 30, label = "Methodist", size = 2, color = "blue3")
+p
+filename <- "./charts/Hosp_Occupancy_Percent_2000_2015.pdf"
+ggsave(filename = filename, width = 5, height = 8,
+       units = c("in"))
+
